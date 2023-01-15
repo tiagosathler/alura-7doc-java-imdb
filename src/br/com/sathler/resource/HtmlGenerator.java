@@ -40,7 +40,7 @@ public class HtmlGenerator {
 						</div>
 						""";
 			writer.println(
-					String.format(div, movie.title(), i+1, movie.urlImage(), movie.title(), movie.rating(), movie.year()));
+					String.format(div, movie.title(), i, movie.urlImage(), movie.title(), movie.rating(), movie.year()));
 		}
 
 		writer.println("""
