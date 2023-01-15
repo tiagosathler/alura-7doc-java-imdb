@@ -15,14 +15,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import br.com.sathler.model.records.Movie;
+
 public class Program {
 
 	private static List<String> objects = new ArrayList<>();
-	private static List<String> titles = new ArrayList<>();
-	private static List<String> urlImages = new ArrayList<>();
-	private static List<Integer> years = new ArrayList<>();
-	private static List<Double> ratings = new ArrayList<>();
-	
+
+	private static final List<Movie> movies = new ArrayList<>();
+
 	private static final String ATTRIBUTE_REGEX = "\\\"\\,\\\"";
 	private static final String VALUE_REGEX = "\\\"\\:\\\"";
 
@@ -47,18 +47,18 @@ public class Program {
 				.build();
 
 		HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
-		
+
 		if (response.statusCode() == 200) {
 			getObjects(response.body());
 			getAttributes();
 		}
 
-		for (int i = 0; i < titles.size(); i++) {
+		for (int i = 0; i < movies.size(); i++) {
 			System.out.println(
-					"Title: " + titles.get(i)
-					+ ", URLImage: " + urlImages.get(i)
-					+ ", Year: " + years.get(i)
-					+ ", Rating: " + ratings.get(i));
+					"Title: " + movies.get(i).title()
+					+ ", URLImage: " + movies.get(i).urlImage()
+					+ ", Year: " + movies.get(i).year()
+					+ ", Rating: " + movies.get(i).rating());
 		}
 
 	}
@@ -66,16 +66,25 @@ public class Program {
 	private static void getAttributes() {
 		for (String obj : objects) {
 			String[] attributes = obj.split(ATTRIBUTE_REGEX);
+
+			String title = null;
+			String urlImage = null;
+			Integer year = null;
+			Double rating = null;
+
 			for (String attribute : attributes) {
 				if (attribute.contains("title")) {
-					titles.add(attribute.split(VALUE_REGEX)[1]);
+					title = attribute.split(VALUE_REGEX)[1];
 				} else if (attribute.contains("image")) {
-					urlImages.add(attribute.split(VALUE_REGEX)[1]);
+					urlImage = attribute.split(VALUE_REGEX)[1];
 				} else if (attribute.contains("year")) {
-					years.add(Integer.parseInt(attribute.split(VALUE_REGEX)[1]));
+					year = Integer.parseInt(attribute.split(VALUE_REGEX)[1]);
 				} else if (attribute.contains("imDbRating") && !attribute.contains("imDbRatingCount")) {
-					ratings.add(Double.parseDouble(attribute.split(VALUE_REGEX)[1]));
+					rating = Double.parseDouble(attribute.split(VALUE_REGEX)[1]);
 				}
+			}
+			if (title != null && urlImage != null && year != null && rating != null) {
+				movies.add(new Movie(title, urlImage, year, rating));
 			}
 		}
 
