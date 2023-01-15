@@ -1,7 +1,9 @@
 package br.com.sathler.application;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.ProxySelector;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -16,6 +18,7 @@ import java.util.List;
 import java.util.Properties;
 
 import br.com.sathler.model.records.Movie;
+import br.com.sathler.resource.HtmlGenerator;
 
 public class Program {
 
@@ -26,7 +29,7 @@ public class Program {
 	private static final String ATTRIBUTE_REGEX = "\\\"\\,\\\"";
 	private static final String VALUE_REGEX = "\\\"\\:\\\"";
 
-	public static void main(String[] args) throws IOException, InterruptedException {
+	public static void main(String[] args) throws IOException, InterruptedException, FileNotFoundException {
 		Properties props = loadProperties();
 
 		URI uri = createURI(props);
@@ -51,6 +54,7 @@ public class Program {
 		if (response.statusCode() == 200) {
 			getObjects(response.body());
 			getAttributes();
+			createHtml();
 		}
 
 		for (int i = 0; i < movies.size(); i++) {
@@ -61,6 +65,12 @@ public class Program {
 					+ ", Rating: " + movies.get(i).rating());
 		}
 
+	}
+
+	private static void createHtml() throws FileNotFoundException {
+		PrintWriter writer = new PrintWriter("content.html");
+		new HtmlGenerator(writer).generate(movies);
+		writer.close();
 	}
 
 	private static void getAttributes() {
